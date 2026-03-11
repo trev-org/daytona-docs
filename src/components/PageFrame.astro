@@ -33,13 +33,42 @@ const hasSidebar = originalHasSidebar && !isApiPage
     try {
       if (!matchMedia('(min-width: 50em)').matches) return
       const scroller = document.getElementById('starlight__sidebar')
+      const activeItem = scroller?.querySelector(
+        '[aria-current="page"], a.active'
+      )
+
+      let parentDetails = activeItem?.closest('details.is-collapsible')
+      while (parentDetails instanceof HTMLDetailsElement) {
+        parentDetails.open = true
+        parentDetails = parentDetails.parentElement?.closest(
+          'details.is-collapsible'
+        )
+      }
 
       const state = JSON.parse(
         sessionStorage.getItem('sl-sidebar-state') || '0'
       )
-      if (!scroller || !state) return
+      if (!scroller) return
 
-      scroller.scrollTop = state.scroll
+      if (state) {
+        scroller.scrollTop = state.scroll
+      }
+
+      if (!(activeItem instanceof HTMLElement)) return
+
+      requestAnimationFrame(() => {
+        const scrollerRect = scroller.getBoundingClientRect()
+        const activeRect = activeItem.getBoundingClientRect()
+        const topBuffer = 24
+        const bottomBuffer = 24
+        const isAboveViewport = activeRect.top < scrollerRect.top + topBuffer
+        const isBelowViewport =
+          activeRect.bottom > scrollerRect.bottom - bottomBuffer
+
+        if (isAboveViewport || isBelowViewport) {
+          activeItem.scrollIntoView({ block: 'center' })
+        }
+      })
     } catch {}
   })()
 </script>
