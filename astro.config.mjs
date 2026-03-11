@@ -1,6 +1,6 @@
 import mdx from '@astrojs/mdx'
-import node from '@astrojs/node'
 import react from '@astrojs/react'
+import vercel from '@astrojs/vercel/serverless'
 import { mintlify } from '@mintlify/astro'
 import { defineConfig } from 'astro/config'
 
@@ -24,9 +24,7 @@ export default defineConfig({
     ],
   },
   output: 'server',
-  adapter: node({
-    mode: 'middleware',
-  }),
+  adapter: vercel(),
   outDir: './dist',
   vite: {
     css: {
