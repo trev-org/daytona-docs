@@ -19,6 +19,7 @@
     "@mintlify/validation": "^0.1.587",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
     "@scalar/astro": "0.1.8",
+    "@vercel/analytics": "^2.0.0",
     "ai": "^6.0.111",
     "astro": "5.17.3",
     "clsx": "2.1.1",

@@ -2,6 +2,7 @@
 import { AssistantProvider, AssistantSheet } from '../components/Assistant'
 import PostHog from '../components/PostHog.astro'
 import ThemeProvider from '../components/ThemeProvider.astro'
+import Analytics from '@vercel/analytics/astro'
 import '../fonts/font-face.css'
 import '../styles/style.scss'
 
@@ -69,6 +70,7 @@ const showAssistant = !!import.meta.env.PUBLIC_MINTLIFY_ASSISTANT_KEY
     <ThemeProvider />
     {showAssistant && <AssistantProvider client:only="react" />}
     {import.meta.env.PROD && <PostHog />}
+    {import.meta.env.PROD && <Analytics />}
     <main class="site-main">
       <slot />
     </main>
