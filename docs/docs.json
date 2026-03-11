@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "Daytona Documentation",
-  "theme": "quill",
+  "theme": "aspen",
   "colors": {
     "primary": "#FFFFFF",
     "light": "#FFFFFF",
@@ -74,30 +74,19 @@
           },
           {
             "group": "System Tools",
-            "pages": [
-              "en/webhooks",
-              "en/network-limits"
-            ]
+            "pages": ["en/webhooks", "en/network-limits"]
           },
           {
             "group": "Security",
-            "pages": [
-              "en/audit-logs",
-              "en/security-exhibit"
-            ]
+            "pages": ["en/audit-logs", "en/security-exhibit"]
           },
           {
             "group": "Deployments",
-            "pages": [
-              "en/oss-deployment",
-              "en/runners"
-            ]
+            "pages": ["en/oss-deployment", "en/runners"]
           },
           {
             "group": "Experimental",
-            "pages": [
-              "en/experimental/otel-collection"
-            ]
+            "pages": ["en/experimental/otel-collection"]
           },
           {
             "group": "Account Management",
@@ -140,10 +129,7 @@
           },
           {
             "group": "References",
-            "pages": [
-              "en/tools/api",
-              "en/tools/cli"
-            ]
+            "pages": ["en/tools/api", "en/tools/cli"]
           },
           {
             "group": "TypeScript SDK",
@@ -246,9 +232,7 @@
           {
             "group": "Other",
             "hidden": true,
-            "pages": [
-              "en/404"
-            ]
+            "pages": ["en/404"]
           }
         ]
       },
@@ -303,30 +287,19 @@
           },
           {
             "group": "システムツール",
-            "pages": [
-              "jp/webhooks",
-              "jp/network-limits"
-            ]
+            "pages": ["jp/webhooks", "jp/network-limits"]
           },
           {
             "group": "セキュリティ",
-            "pages": [
-              "jp/audit-logs",
-              "jp/security-exhibit"
-            ]
+            "pages": ["jp/audit-logs", "jp/security-exhibit"]
           },
           {
             "group": "デプロイメント",
-            "pages": [
-              "jp/oss-deployment",
-              "jp/runners"
-            ]
+            "pages": ["jp/oss-deployment", "jp/runners"]
           },
           {
             "group": "実験的機能",
-            "pages": [
-              "jp/experimental/otel-collection"
-            ]
+            "pages": ["jp/experimental/otel-collection"]
           },
           {
             "group": "アカウント管理",
@@ -355,10 +328,7 @@
           },
           {
             "group": "リファレンス",
-            "pages": [
-              "jp/tools/api",
-              "jp/tools/cli"
-            ]
+            "pages": ["jp/tools/api", "jp/tools/cli"]
           },
           {
             "group": "TypeScript SDK",
@@ -436,17 +406,12 @@
           },
           {
             "group": "Go SDK",
-            "pages": [
-              "jp/go-sdk/index",
-              "jp/go-sdk/daytona"
-            ]
+            "pages": ["jp/go-sdk/index", "jp/go-sdk/daytona"]
           },
           {
             "group": "Other",
             "hidden": true,
-            "pages": [
-              "jp/404"
-            ]
+            "pages": ["jp/404"]
           }
         ]
       }
