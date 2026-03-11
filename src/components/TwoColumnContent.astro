@@ -58,6 +58,7 @@ const hasToc = Astro.props.toc && !isApiPage
 
   .main-pane {
     width: 100%;
+    min-width: 0;
   }
 
   :global([data-has-sidebar][data-has-toc]) .main-pane {
