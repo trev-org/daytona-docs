@@ -1,0 +1,91 @@
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 60px;
+}
+
+// Starlight CSS variables (retained for components that reference them)
+:root {
+  --sl-nav-pad-x: 1rem;
+  --sl-nav-gap: 0.5rem;
+  --sl-menu-button-size: 2rem;
+  --sl-z-index-navbar: 3;
+  --sl-mobile-toc-height: 0px;
+  --sl-text-xs: 0.8125rem;
+  --sl-outline-offset-inside: -0.1875rem;
+  --sl-sidebar-item-padding-inline: 0.5rem;
+  --sl-line-height: 1.8;
+  --sl-line-height-headings: 1.2;
+  --sl-icon-color: currentColor;
+  --sl-icon-size: 1em;
+  --sl-color-white: #fff;
+  --sl-color-gray-1: #e0e1e3;
+  --sl-color-gray-2: #c1c3c7;
+  --sl-color-gray-3: #a2a5ab;
+  --sl-color-gray-4: #848890;
+  --sl-color-gray-5: #383b40;
+  --sl-color-gray-6: #272a2e;
+  --sl-color-gray-7: #181b20;
+  --sl-color-hairline-light: rgba(255, 255, 255, 0.07);
+  --sl-color-text-accent: var(--hover-color);
+  --sl-steps-start: 0;
+}
+
+html[data-theme='light'] {
+  --sl-color-white: #181818;
+  --sl-color-gray-1: #272a2e;
+  --sl-color-gray-2: #383b40;
+  --sl-color-gray-3: #545860;
+  --sl-color-gray-4: #848890;
+  --sl-color-gray-5: #b7bbc0;
+  --sl-color-gray-6: #c8ccd0;
+  --sl-color-gray-7: #e0e1e3;
+  --sl-color-hairline-light: rgba(0, 0, 0, 0.07);
+}
+
+// Starlight utility classes
+.sl-flex {
+  display: flex;
+}
+
+body {
+  background-color: var(--bg-color);
+  margin: 0;
+}
+
+main {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color);
+  gap: 16px;
+}
+
+section {
+  max-width: 1248px;
+  //margin: 0 80px;
+  padding-bottom: 0 !important;
+
+  @include for-laptop-screen-sizes {
+    margin: 0 40px;
+  }
+
+  @include for-mobile-screen-sizes {
+    margin: 0 20px;
+  }
+}
+
+a {
+  text-decoration: unset;
+}
+pre > code {
+  text-wrap: wrap !important;
+  white-space: pre-wrap;
+}
+
+::selection {
+  background-color: var(--selection-bg-color);
+  color: var(--selection-text-color);
+}

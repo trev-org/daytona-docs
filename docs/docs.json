@@ -1,0 +1,455 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "Daytona Documentation",
+  "theme": "quill",
+  "colors": {
+    "primary": "#FFFFFF",
+    "light": "#FFFFFF",
+    "dark": "#000000"
+  },
+  "favicon": "/favicon.ico",
+  "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Daytona",
+          "href": "https://www.daytona.io"
+        },
+        {
+          "anchor": "Changelog",
+          "href": "https://www.daytona.io/changelog"
+        },
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/daytonaio/daytona"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "language": "en",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "en/index",
+              "en/architecture",
+              "en/getting-started",
+              "en/sandboxes"
+            ]
+          },
+          {
+            "group": "Sandbox",
+            "pages": [
+              "en/configuration",
+              "en/snapshots",
+              "en/declarative-builder",
+              "en/volumes",
+              "en/regions"
+            ]
+          },
+          {
+            "group": "Agent Tools",
+            "pages": [
+              "en/file-system-operations",
+              "en/git-operations",
+              "en/language-server-protocol",
+              "en/process-code-execution",
+              "en/pty",
+              "en/log-streaming",
+              "en/mcp",
+              "en/computer-use"
+            ]
+          },
+          {
+            "group": "Human Tools",
+            "pages": [
+              "en/web-terminal",
+              "en/ssh-access",
+              "en/vnc-access",
+              "en/vpn-connections",
+              "en/preview",
+              "en/playground"
+            ]
+          },
+          {
+            "group": "System Tools",
+            "pages": [
+              "en/webhooks",
+              "en/network-limits"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "en/audit-logs",
+              "en/security-exhibit"
+            ]
+          },
+          {
+            "group": "Deployments",
+            "pages": [
+              "en/oss-deployment",
+              "en/runners"
+            ]
+          },
+          {
+            "group": "Experimental",
+            "pages": [
+              "en/experimental/otel-collection"
+            ]
+          },
+          {
+            "group": "Account Management",
+            "pages": [
+              "en/api-keys",
+              "en/organizations",
+              "en/limits",
+              "en/billing",
+              "en/linked-accounts"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "en/guides/index",
+              "en/guides/data-analysis-with-ai",
+              "en/guides/agentkit/inngest-agentkit-coding-agent",
+              "en/guides/opencode/index",
+              "en/guides/opencode/opencode-plugin",
+              "en/guides/opencode/opencode-sdk-agent",
+              "en/guides/opencode/opencode-web-agent",
+              "en/guides/langchain/langchain-data-analysis",
+              "en/guides/mastra/mastra-coding-agent",
+              "en/guides/claude/index",
+              "en/guides/claude/claude-code-run-cli-sandbox",
+              "en/guides/claude/claude-agent-sdk-interactive-terminal-sandbox",
+              "en/guides/claude/claude-agent-sdk-connect-service-sandbox",
+              "en/guides/claude/claude-code-run-tasks-stream-logs-sandbox",
+              "en/guides/openclaw/index",
+              "en/guides/openclaw/openclaw-run-secure-sandbox",
+              "en/guides/openclaw/openclaw-sdk-sandbox",
+              "en/guides/codex/codex-sdk-interactive-terminal-sandbox",
+              "en/guides/google-adk-code-generator",
+              "en/guides/letta-code/letta-code-agent",
+              "en/guides/reinforcement-learning/trl-grpo-training",
+              "en/guides/rlm/index",
+              "en/guides/rlm/recursive-language-models",
+              "en/guides/rlm/dspy-rlms"
+            ]
+          },
+          {
+            "group": "References",
+            "pages": [
+              "en/tools/api",
+              "en/tools/cli"
+            ]
+          },
+          {
+            "group": "TypeScript SDK",
+            "pages": [
+              "en/typescript-sdk/index",
+              "en/typescript-sdk/daytona",
+              "en/typescript-sdk/sandbox",
+              "en/typescript-sdk/process",
+              "en/typescript-sdk/file-system",
+              "en/typescript-sdk/git",
+              "en/typescript-sdk/lsp-server",
+              "en/typescript-sdk/code-interpreter",
+              "en/typescript-sdk/computer-use",
+              "en/typescript-sdk/object-storage",
+              "en/typescript-sdk/snapshot",
+              "en/typescript-sdk/volume",
+              "en/typescript-sdk/pty",
+              "en/typescript-sdk/pty-handle",
+              "en/typescript-sdk/charts",
+              "en/typescript-sdk/image",
+              "en/typescript-sdk/execute-response",
+              "en/typescript-sdk/errors"
+            ]
+          },
+          {
+            "group": "Python SDK",
+            "pages": [
+              "en/python-sdk/index",
+              {
+                "group": "Common",
+                "pages": [
+                  "en/python-sdk/common/charts",
+                  "en/python-sdk/common/errors",
+                  "en/python-sdk/common/image"
+                ]
+              },
+              {
+                "group": "Sync",
+                "pages": [
+                  "en/python-sdk/sync/daytona",
+                  "en/python-sdk/sync/sandbox",
+                  "en/python-sdk/sync/process",
+                  "en/python-sdk/sync/file-system",
+                  "en/python-sdk/sync/git",
+                  "en/python-sdk/sync/lsp-server",
+                  "en/python-sdk/sync/code-interpreter",
+                  "en/python-sdk/sync/computer-use",
+                  "en/python-sdk/sync/object-storage",
+                  "en/python-sdk/sync/snapshot",
+                  "en/python-sdk/sync/volume"
+                ]
+              },
+              {
+                "group": "Async",
+                "pages": [
+                  "en/python-sdk/async/async-daytona",
+                  "en/python-sdk/async/async-sandbox",
+                  "en/python-sdk/async/async-process",
+                  "en/python-sdk/async/async-file-system",
+                  "en/python-sdk/async/async-git",
+                  "en/python-sdk/async/async-lsp-server",
+                  "en/python-sdk/async/async-code-interpreter",
+                  "en/python-sdk/async/async-computer-use",
+                  "en/python-sdk/async/async-object-storage",
+                  "en/python-sdk/async/async-snapshot",
+                  "en/python-sdk/async/async-volume"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Ruby SDK",
+            "pages": [
+              "en/ruby-sdk/index",
+              "en/ruby-sdk/daytona",
+              "en/ruby-sdk/sandbox",
+              "en/ruby-sdk/config",
+              "en/ruby-sdk/process",
+              "en/ruby-sdk/file-system",
+              "en/ruby-sdk/git",
+              "en/ruby-sdk/lsp-server",
+              "en/ruby-sdk/computer-use",
+              "en/ruby-sdk/object-storage",
+              "en/ruby-sdk/snapshot",
+              "en/ruby-sdk/volume",
+              "en/ruby-sdk/volume-service",
+              "en/ruby-sdk/image"
+            ]
+          },
+          {
+            "group": "Go SDK",
+            "pages": [
+              "en/go-sdk/index",
+              "en/go-sdk/daytona",
+              "en/go-sdk/errors",
+              "en/go-sdk/options",
+              "en/go-sdk/types"
+            ]
+          },
+          {
+            "group": "Other",
+            "hidden": true,
+            "pages": [
+              "en/404"
+            ]
+          }
+        ]
+      },
+      {
+        "language": "jp",
+        "groups": [
+          {
+            "group": "はじめに",
+            "pages": [
+              "jp/index",
+              "jp/architecture",
+              "jp/getting-started",
+              "jp/sandboxes"
+            ]
+          },
+          {
+            "group": "サンドボックス",
+            "pages": [
+              "jp/configuration",
+              "jp/snapshots",
+              "jp/declarative-builder",
+              "jp/volumes",
+              "jp/regions",
+              "jp/sandbox-management"
+            ]
+          },
+          {
+            "group": "エージェントツール",
+            "pages": [
+              "jp/file-system-operations",
+              "jp/git-operations",
+              "jp/language-server-protocol",
+              "jp/process-code-execution",
+              "jp/pty",
+              "jp/log-streaming",
+              "jp/mcp",
+              "jp/computer-use"
+            ]
+          },
+          {
+            "group": "ヒューマンツール",
+            "pages": [
+              "jp/web-terminal",
+              "jp/ssh-access",
+              "jp/vnc-access",
+              "jp/vpn-connections",
+              "jp/preview",
+              "jp/preview-and-authentication",
+              "jp/custom-domain-authentication",
+              "jp/playground"
+            ]
+          },
+          {
+            "group": "システムツール",
+            "pages": [
+              "jp/webhooks",
+              "jp/network-limits"
+            ]
+          },
+          {
+            "group": "セキュリティ",
+            "pages": [
+              "jp/audit-logs",
+              "jp/security-exhibit"
+            ]
+          },
+          {
+            "group": "デプロイメント",
+            "pages": [
+              "jp/oss-deployment",
+              "jp/runners"
+            ]
+          },
+          {
+            "group": "実験的機能",
+            "pages": [
+              "jp/experimental/otel-collection"
+            ]
+          },
+          {
+            "group": "アカウント管理",
+            "pages": [
+              "jp/api-keys",
+              "jp/organizations",
+              "jp/limits",
+              "jp/billing",
+              "jp/linked-accounts"
+            ]
+          },
+          {
+            "group": "ガイド",
+            "pages": [
+              "jp/guides/index",
+              "jp/guides/data-analysis-with-ai",
+              "jp/data-analysis-with-ai",
+              "jp/guides/opencode/index",
+              "jp/guides/mastra/mastra-coding-agent",
+              "jp/guides/claude/index",
+              "jp/guides/openclaw/index",
+              "jp/guides/google-adk-code-generator",
+              "jp/guides/rlm/index",
+              "jp/guides/rlm/dspy-rlms"
+            ]
+          },
+          {
+            "group": "リファレンス",
+            "pages": [
+              "jp/tools/api",
+              "jp/tools/cli"
+            ]
+          },
+          {
+            "group": "TypeScript SDK",
+            "pages": [
+              "jp/typescript-sdk/index",
+              "jp/typescript-sdk/daytona",
+              "jp/typescript-sdk/sandbox",
+              "jp/typescript-sdk/process",
+              "jp/typescript-sdk/file-system",
+              "jp/typescript-sdk/git",
+              "jp/typescript-sdk/lsp-server",
+              "jp/typescript-sdk/computer-use",
+              "jp/typescript-sdk/object-storage",
+              "jp/typescript-sdk/snapshot",
+              "jp/typescript-sdk/volume",
+              "jp/typescript-sdk/charts",
+              "jp/typescript-sdk/image",
+              "jp/typescript-sdk/execute-response",
+              "jp/typescript-sdk/errors"
+            ]
+          },
+          {
+            "group": "Python SDK",
+            "pages": [
+              "jp/python-sdk/index",
+              {
+                "group": "Common",
+                "pages": [
+                  "jp/python-sdk/common/index",
+                  "jp/python-sdk/common/charts",
+                  "jp/python-sdk/common/errors",
+                  "jp/python-sdk/common/image"
+                ]
+              },
+              {
+                "group": "Sync",
+                "pages": [
+                  "jp/python-sdk/sync/index",
+                  "jp/python-sdk/sync/daytona",
+                  "jp/python-sdk/sync/sandbox",
+                  "jp/python-sdk/sync/process",
+                  "jp/python-sdk/sync/file-system",
+                  "jp/python-sdk/sync/git",
+                  "jp/python-sdk/sync/lsp-server",
+                  "jp/python-sdk/sync/computer-use",
+                  "jp/python-sdk/sync/object-storage",
+                  "jp/python-sdk/sync/snapshot",
+                  "jp/python-sdk/sync/volume"
+                ]
+              },
+              {
+                "group": "Async",
+                "pages": [
+                  "jp/python-sdk/async/index",
+                  "jp/python-sdk/async/async-daytona",
+                  "jp/python-sdk/async/async-sandbox",
+                  "jp/python-sdk/async/async-file-system",
+                  "jp/python-sdk/async/async-git",
+                  "jp/python-sdk/async/async-lsp-server",
+                  "jp/python-sdk/async/async-computer-use",
+                  "jp/python-sdk/async/async-object-storage",
+                  "jp/python-sdk/async/async-snapshot",
+                  "jp/python-sdk/async/async-volume"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Ruby SDK",
+            "pages": [
+              "jp/ruby-sdk/index",
+              "jp/ruby-sdk/daytona",
+              "jp/ruby-sdk/sandbox"
+            ]
+          },
+          {
+            "group": "Go SDK",
+            "pages": [
+              "jp/go-sdk/index",
+              "jp/go-sdk/daytona"
+            ]
+          },
+          {
+            "group": "Other",
+            "hidden": true,
+            "pages": [
+              "jp/404"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

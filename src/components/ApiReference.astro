@@ -1,0 +1,59 @@
+---
+import { ScalarComponent } from '@scalar/astro'
+
+const base = import.meta.env.BASE_URL
+const daytonaApiSpecUrl = `${base}openapi/daytona-api.yaml`
+const daytonaToolboxApiSpecUrl = `${base}openapi/daytona-toolbox-api.yaml`
+---
+
+<div id="scalar-container">
+  <ScalarComponent
+    configuration={{
+      sources: [
+        {
+          title: 'Daytona API',
+          slug: 'daytona',
+          default: true,
+          url: daytonaApiSpecUrl,
+        },
+        {
+          title: 'Daytona Toolbox API',
+          slug: 'daytona-toolbox',
+          url: daytonaToolboxApiSpecUrl,
+        },
+      ],
+      hideClientButton: true,
+      hideTestRequestButton: true,
+      theme: 'default',
+      searchHotKey: 'l',
+      hideDarkModeToggle: true,
+      telemetry: false,
+    }}
+  />
+</div>
+
+<script>
+  function syncScalarTheme() {
+    const scalar = document.querySelector('#scalar-container scalar-api')
+    if (!scalar) return
+
+    const docsTheme = document.documentElement.dataset.theme
+    const scalarTheme = docsTheme === 'light' ? 'default' : 'moon'
+    scalar.setAttribute('theme', scalarTheme)
+  }
+
+  function initializeScalarThemeSync() {
+    syncScalarTheme()
+    const htmlObserver = new MutationObserver(syncScalarTheme)
+    htmlObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    })
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeScalarThemeSync)
+  } else {
+    initializeScalarThemeSync()
+  }
+</script>

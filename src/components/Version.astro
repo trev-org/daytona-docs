@@ -1,0 +1,37 @@
+---
+import { execSync } from 'node:child_process'
+import { coerce, major, minor } from 'semver'
+
+function normalizeVersion(rawVersion?: string | null) {
+  if (!rawVersion) return null
+
+  const normalized = coerce(rawVersion)?.version
+  if (!normalized || normalized === '0.0.0') return null
+
+  return normalized
+}
+
+function getVersionFromGit() {
+  try {
+    const latestTag = execSync('git describe --tags --abbrev=0', {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
+
+    return normalizeVersion(latestTag)
+  } catch {
+    return null
+  }
+}
+
+const version =
+  normalizeVersion(import.meta.env.VERSION) ??
+  normalizeVersion(import.meta.env.PUBLIC_DOCS_VERSION) ??
+  getVersionFromGit() ??
+  '0.1.0'
+
+const [maj, min] = [major(version), minor(version)]
+---
+
+{maj}.{min}

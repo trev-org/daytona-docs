@@ -1,0 +1,28 @@
+---
+title: リージョンの選択
+---
+
+Daytona は現在、以下のリージョンで利用可能です。
+
+- 米国（US）
+- 欧州（EU）
+
+Daytona の[設定](/docs/jp/configuration)手順でリージョンを選択できます。
+
+```python
+from daytona import Daytona, DaytonaConfig
+
+config = DaytonaConfig(
+    target="us"
+)
+
+daytona = Daytona(config)
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona: Daytona = new Daytona({
+    target: "eu"
+});
+```

@@ -1,0 +1,85 @@
+---
+import textArrowIcon from '@assets/icons/text-arrow.svg?raw'
+import ThemeSelect from './ThemeSelect.astro'
+import { LocaleSelect } from './menu/LocaleSelector'
+
+const locale =
+  Astro.props.lang === 'jp' || Astro.props.lang === 'ja'
+    ? 'jp'
+    : Astro.props.lang || 'en'
+---
+<footer class="docs-footer__container">
+  <div class="docs-footer__container__support-links">
+    <p>
+      <Fragment set:html={textArrowIcon} />{
+        Astro.locals.t('footer.needHelp' as any)
+      } -
+      <a href="https://go.daytona.io/slack"
+        >{Astro.locals.t('footer.reachSupport' as any)}</a
+      >
+    </p>
+    <p>
+      <Fragment set:html={textArrowIcon} />{
+        Astro.locals.t('footer.latestUpdates' as any)
+      } - <a href="https://github.com/daytonaio/daytona/commits/main/"
+        >{Astro.locals.t('footer.viewChangelog' as any)}</a
+      >
+    </p>
+    <p>
+      <Fragment set:html={textArrowIcon} />{
+        Astro.locals.t('footer.dotfilesInsider' as any)
+      } - <a href="https://www.daytona.io/dotfiles/"
+        >{Astro.locals.t('footer.readBlog' as any)}</a
+      >
+    </p>
+    <p>
+      <Fragment set:html={textArrowIcon} />{
+        Astro.locals.t('footer.LLMs' as any)
+      } -
+      <a href="https://www.daytona.io/docs/llms.txt">llms.txt</a> &
+      <a href="https://www.daytona.io/docs/llms-full.txt">llms-full.txt</a>
+    </p>
+  </div>
+
+  <div class="docs-footer__container__bottom">
+    <div class="docs-footer__container__bottom-block">
+      <div><p>© {new Date().getFullYear()} Daytona Platforms, Inc.</p></div>
+      <div class="divider"></div>
+    </div>
+
+    <div class="footer-selects">
+      <LocaleSelect client:load locale={locale} />
+      <ThemeSelect />
+    </div>
+    <div class="menu-list">
+      <a href="https://www.daytona.io/company/privacy-policy"
+        >{Astro.locals.t('footer.privacyPolicy' as any)}</a
+      >
+      <a href="https://www.daytona.io/company/terms-of-service"
+        >{Astro.locals.t('footer.termsOfService' as any)}</a
+      >
+    </div>
+  </div>
+</footer>
+
+<style>
+  .docs-footer__container {
+    margin-bottom: 3vh;
+  }
+
+  .footer-selects {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+    order: 2;
+    margin-left: auto;
+    flex-shrink: 0;
+
+    @media screen and (max-width: 768px) {
+      margin-left: 0;
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+</style>

@@ -1,0 +1,223 @@
+---
+import { PAGE_TITLE_ID } from './TableOfContent/constants'
+import { OpenPageDropdown } from './OpenPageDropdown/OpenPageDropdown'
+
+const { origin, pathname } = Astro.url
+const normalizedPath = pathname.replace(/\/$/, '')
+const markdownUrl = `${origin}${normalizedPath || '/docs/en'}.md`
+const copyButtonId = `copy-markdown-${Astro.props.entry.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`
+const locale =
+  pathname.startsWith('/docs/jp') || pathname.startsWith('/docs/ja') ? 'jp' : 'en'
+---
+
+{
+  !Astro.props.entry.data.hideTitleOnPage && (
+    <h1 id={PAGE_TITLE_ID}>{Astro.props.entry.data.title}</h1>
+  )
+}
+<div class="title-actions">
+  <button
+    id={copyButtonId}
+    type="button"
+    class="action-button action-button-ghost"
+    data-copy-markdown-url={markdownUrl}
+    data-copy-success-label={locale === 'jp' ? 'コピーしました！' : 'Copied!'}
+    data-copy-error-label={locale === 'jp' ? 'コピーに失敗しました' : 'Copy failed'}
+  >
+    <svg stroke-linejoin="round" viewBox="0 0 16 16" height="14" width="14">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M10 1.5H4.75A1.25 1.25 0 0 0 3.5 2.75V10h1.25V2.75h5.25V1.5ZM6 4.75A1.25 1.25 0 0 1 7.25 3.5h4A1.25 1.25 0 0 1 12.5 4.75v8.5a1.25 1.25 0 0 1-1.25 1.25h-4A1.25 1.25 0 0 1 6 13.25v-8.5Zm1.25 0v8.5h4v-8.5h-4Z"
+        fill="currentColor"
+      ></path>
+    </svg>
+    <span data-copy-label>{Astro.locals.t('header.copyForLlms' as any)}</span>
+  </button>
+  <a
+    href={markdownUrl}
+    target="_blank"
+    rel="noreferrer"
+    class="action-button action-button-ghost desktop-only"
+  >
+    <svg stroke-linejoin="round" viewBox="0 0 22 16" height="16" width="16">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M19.5 2.25H2.5C1.80964 2.25 1.25 2.80964 1.25 3.5V12.5C1.25 13.1904 1.80964 13.75 2.5 13.75H19.5C20.1904 13.75 20.75 13.1904 20.75 12.5V3.5C20.75 2.80964 20.1904 2.25 19.5 2.25ZM2.5 1C1.11929 1 0 2.11929 0 3.5V12.5C0 13.8807 1.11929 15 2.5 15H19.5C20.8807 15 22 13.8807 22 12.5V3.5C22 2.11929 20.8807 1 19.5 1H2.5ZM3 4.5H4H4.25H4.6899L4.98715 4.82428L7 7.02011L9.01285 4.82428L9.3101 4.5H9.75H10H11V5.5V11.5H9V7.79807L7.73715 9.17572L7 9.97989L6.26285 9.17572L5 7.79807V11.5H3V5.5V4.5ZM15 8V4.5H17V8H19.5L17 10.5L16 11.5L15 10.5L12.5 8H15Z"
+        fill="currentColor"
+      >
+      </path>
+    </svg>
+    {Astro.locals.t('header.viewAsMarkdown' as any)}
+  </a>
+  <div class="right dropdown-wrapper">
+    <OpenPageDropdown
+      client:load
+      locale={locale}
+      url={markdownUrl}
+      className="title-actions-dropdown"
+    />
+  </div>
+
+  {
+    (Astro.props.entry.data.licence || Astro.props.entry.data.distribution) && (
+      <dl class="tiers-distribution-list">
+        <div>
+          <>
+            <dt>Licence:</dt>
+            <dd>{Astro.props.entry.data.licence}</dd>
+          </>
+        </div>
+        <div>
+          <>
+            <dt>Distribution:</dt>
+            <dd>{Astro.props.entry.data.distribution}</dd>
+          </>
+        </div>
+      </dl>
+    )
+  }
+
+  <style>
+    .action-button {
+      border-radius: 0;
+      padding: 2px 0;
+      gap: 0.625rem;
+      justify-content: flex-start;
+      align-items: center;
+      display: inline-flex;
+      cursor: pointer;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      font-weight: 500;
+      color: var(--primary-text-color);
+      background-color: transparent;
+      border: 0;
+      text-decoration: none;
+      vertical-align: middle;
+    }
+
+    .action-button-ghost {
+      background-color: transparent;
+      border: 0;
+    }
+
+    .action-button:hover,
+    .action-button:focus-visible {
+      opacity: 0.8;
+    }
+
+    .action-button > svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .tiers-distribution-list {
+      margin: 0;
+      border-left: 1px solid var(--hover-color);
+      padding-left: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      > div {
+        display: inline-flex;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        letter-spacing: -0.02em;
+        > dt {
+          color: var(--secondary-text-color);
+        }
+        > dd {
+          color: var(--primary-text-color);
+          margin-left: 1ch;
+        }
+      }
+    }
+    h1 {
+      margin-bottom: unset !important;
+    }
+
+    .title-actions {
+      margin-top: 4px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.8125rem;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1024px) {
+      .title-actions {
+        padding-right: calc(
+          var(--sl-nav-gap) + var(--sl-nav-pad-x) + var(--sl-menu-button-size)
+        );
+      }
+    }
+
+    .title-actions:first-child {
+      margin-top: 40px;
+    }
+
+    .right {
+      margin-left: auto;
+    }
+
+    .dropdown-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
+    @media (max-width: 650px) {
+      .desktop-only {
+        display: none;
+      }
+    }
+  </style>
+</div>
+
+<script is:inline>
+  ;(() => {
+    if (typeof window === 'undefined') return
+    if (window.__daytonaCopyMarkdownBound) return
+
+    window.__daytonaCopyMarkdownBound = true
+
+    document.addEventListener('click', async event => {
+      const button =
+        event.target instanceof Element
+          ? event.target.closest('[data-copy-markdown-url]')
+          : null
+
+      if (!(button instanceof HTMLButtonElement)) return
+
+      const url = button.dataset.copyMarkdownUrl
+      if (!url || !navigator.clipboard?.writeText) return
+
+      const label = button.querySelector('[data-copy-label]')
+      const originalText = label?.textContent || 'Copy for LLM'
+      const successText = button.dataset.copySuccessLabel || 'Copied!'
+      const errorText = button.dataset.copyErrorLabel || 'Copy failed'
+
+      try {
+        const response = await fetch(url)
+        const markdown = await response.text()
+        await navigator.clipboard.writeText(markdown)
+        if (label) label.textContent = successText
+      } catch (error) {
+        console.error(error)
+        if (label) label.textContent = errorText
+      } finally {
+        window.setTimeout(() => {
+          if (label) label.textContent = originalText
+        }, 2000)
+      }
+    })
+  })()
+</script>

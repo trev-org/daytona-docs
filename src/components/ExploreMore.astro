@@ -1,0 +1,99 @@
+---
+import { getCollection } from 'astro:content'
+import { getExploreMoreData } from '../utils/mintlify-page-data'
+
+const { expanded } = Astro.props
+const docs = await getCollection('docs')
+const exploreMoreData = getExploreMoreData(
+  docs,
+  Astro.url.pathname,
+  Astro.props.lang || 'en'
+)
+const gridColumn = expanded ? 'span 2' : 'inherit'
+const style = `grid-column: ${gridColumn};`
+---
+
+<div class="explore-more">
+  {
+    exploreMoreData.map(group => (
+      <section>
+        <h1>
+          {group.title || Astro.locals.t('exploreMore.exploreMore' as any)}
+        </h1>
+        <ul>
+          {group.items.map(item => (
+            <li style={style}>
+              <a href={item.href}>
+                <span class="document-title">{item.title}</span>
+                <br />
+                <span class="subtitle">{item.subtitle}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style is:global>
+  .explore-more section {
+    all: unset;
+    display: block;
+    color: var(--primary-text-color);
+  }
+
+  .explore-more h1 {
+    all: unset;
+    display: block;
+    font-family: 'Berkeley Mono', monospace;
+    font-weight: 400;
+    font-size: 2rem;
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+    color: var(--primary-text-color);
+    margin-top: 56px;
+    margin-bottom: 16px;
+  }
+
+  .explore-more ul {
+    all: unset;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+  }
+
+  .explore-more li {
+    display: block;
+    list-style: none;
+  }
+
+  .explore-more ul li a {
+    display: block;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 1em;
+    background: var(--block-bg-color);
+    border: var(--border);
+    border-color: var(--block-bg-color);
+    text-decoration: none;
+    color: inherit;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .explore-more ul li a:hover {
+    background: var(--secondary-text-color);
+    border-color: var(--secondary-text-color);
+    text-decoration: none;
+  }
+
+  .explore-more .document-title {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .explore-more .subtitle {
+    font-weight: normal;
+    font-size: 12.8px;
+  }
+</style>

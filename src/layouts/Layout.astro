@@ -1,0 +1,84 @@
+---
+import { AssistantProvider, AssistantSheet } from '../components/Assistant'
+import PostHog from '../components/PostHog.astro'
+import ThemeProvider from '../components/ThemeProvider.astro'
+import '../fonts/font-face.css'
+import '../styles/style.scss'
+
+interface Props {
+  title?: string
+  description?: string
+  lang?: string
+  favicons?: {
+    icons: Array<{
+      rel?: string
+      type?: string
+      sizes?: string
+      href?: string
+      media?: string
+    }>
+  }
+}
+
+const {
+  title = 'Daytona Documentation',
+  description = 'Daytona documentation',
+  lang = 'en',
+  favicons,
+} = Astro.props
+const baseUrl = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`
+const image = `${baseUrl}daytona.png`
+const showAssistant = !!import.meta.env.PUBLIC_MINTLIFY_ASSISTANT_KEY
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:image" content={image} />
+    <meta property="og:image:secure_url" content={image} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1248" />
+    <meta property="og:image:height" content="628" />
+    <meta property="og:image:alt" content="Daytona" />
+    <meta name="algolia-site-verification" content="2988B4D95ECF88B6" />
+    {favicons?.icons?.length ? (
+      favicons.icons.map(icon => (
+        <link
+          rel={icon.rel}
+          type={icon.type}
+          sizes={icon.sizes}
+          href={icon.href}
+          media={icon.media}
+        />
+      ))
+    ) : (
+      <link rel="icon" href={`${baseUrl}favicon.ico`} />
+    )}
+    <slot name="head" />
+  </head>
+  <body>
+    <ThemeProvider />
+    {showAssistant && <AssistantProvider client:only="react" />}
+    {import.meta.env.PROD && <PostHog />}
+    {showAssistant ? (
+      <div style="display:flex">
+        <main style="flex:1;min-width:0">
+          <slot />
+        </main>
+        <AssistantSheet client:only="react" transition:persist />
+      </div>
+    ) : (
+      <main>
+        <slot />
+      </main>
+    )}
+  </body>
+</html>

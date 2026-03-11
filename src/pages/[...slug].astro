@@ -1,0 +1,165 @@
+---
+import { components as mintlifyComponents } from '@mintlify/astro/components'
+import { getCollection, render } from 'astro:content'
+import { resolveMintlifyPageData } from '../utils/mintlify-page-data'
+
+import ApiReferenceComponent from '../components/ApiReference.astro'
+import ArchitectureDiagram from '../components/ArchitectureDiagram.astro'
+import Aside from '../components/Aside.astro'
+import ContentPanel from '../components/ContentPanel.astro'
+import EditLink from '../components/EditLink.astro'
+import Footer from '../components/Footer.astro'
+import ExploreMore from '../components/ExploreMore.astro'
+import GuidesList from '../components/GuidesList.astro'
+import Header from '../components/Header.astro'
+import Label from '../components/Label.astro'
+import MarkdownContent from '../components/MarkdownContent.astro'
+import PageFrame from '../components/PageFrame.astro'
+import Pagination from '../components/Pagination.astro'
+import PageTitle from '../components/PageTitle.astro'
+import SandboxDiagram from '../components/SandboxDiagram.astro'
+import Sidebar from '../components/Sidebar.astro'
+import TableOfContents from '../components/TableOfContents.astro'
+import TwoColumnContent from '../components/TwoColumnContent.astro'
+import Layout from '../layouts/Layout.astro'
+
+interface TocItem {
+  depth: number
+  slug: string
+  text: string
+  children: TocItem[]
+}
+
+function buildTocItems(
+  headings: Array<{ depth: number; slug: string; text: string }>,
+  minLevel: number,
+  maxLevel: number
+): TocItem[] {
+  const rootItems: TocItem[] = []
+  const stack: TocItem[] = []
+
+  const filtered = headings
+    .filter(heading => heading.depth >= minLevel && heading.depth <= maxLevel)
+    .map(heading => ({
+      depth: heading.depth,
+      slug: heading.slug,
+      text: heading.text,
+      children: [],
+    }))
+
+  for (const item of filtered) {
+    while (
+      stack.length > 0 &&
+      stack[stack.length - 1].depth >= item.depth
+    ) {
+      stack.pop()
+    }
+
+    if (stack.length === 0) {
+      rootItems.push(item)
+    } else {
+      stack[stack.length - 1].children.push(item)
+    }
+
+    stack.push(item)
+  }
+
+  return rootItems
+}
+
+function normalizeDocId(docId: string): string {
+  return docId.endsWith('/index') ? docId.slice(0, -'/index'.length) : docId
+}
+
+const docs = await getCollection('docs')
+const requestedSlug = (Astro.params.slug || '').replace(/\/$/, '')
+
+const entry = docs.find(doc => {
+  const normalized = normalizeDocId(doc.id)
+  return normalized === requestedSlug || doc.id === requestedSlug
+})
+
+if (!entry) {
+  return new Response(null, { status: 404 })
+}
+
+const locale = entry.id.startsWith('jp/') || entry.id === 'jp' ? 'jp' : 'en'
+const htmlLang = locale === 'jp' ? 'ja' : 'en'
+const { Content, headings } = await render(entry)
+const pageData = resolveMintlifyPageData(docs, Astro.url.pathname)
+const mdxComponents = {
+  ...mintlifyComponents,
+  ApiReference: ApiReferenceComponent,
+  ArchitectureDiagram,
+  Aside,
+  ExploreMore,
+  GuidesList,
+  Label,
+  SandboxDiagram,
+}
+const toc = {
+  minHeadingLevel: 2,
+  maxHeadingLevel: 4,
+  items: buildTocItems(headings, 2, 4),
+}
+const repoUrl =
+  import.meta.env.PUBLIC_REPO_URL || 'https://github.com/trev-org/daytona-docs'
+const editUrl = `${repoUrl.replace(/\/$/, '')}/blob/main/docs/${entry.id}.mdx`
+const pageTitle = entry.data.title || 'Daytona Documentation'
+const pageDescription = entry.data.description || ''
+const canonicalPath = `/docs/${normalizeDocId(entry.id)}`
+const localizedEntryId = entry.id.replace(/^(en|jp)/, locale === 'en' ? 'jp' : 'en')
+const hasLocalizedEntry = docs.some(doc => doc.id === localizedEntryId)
+const alternateLinks: Array<{ hreflang: string; href: string }> = [
+  {
+    hreflang: 'en',
+    href: `/docs/${normalizeDocId(entry.id.replace(/^jp/, 'en'))}`,
+  },
+]
+
+if (hasLocalizedEntry) {
+  alternateLinks.push({
+    hreflang: 'ja',
+    href: `/docs/${normalizeDocId(entry.id.replace(/^en/, 'jp'))}`,
+  })
+}
+---
+
+<Layout
+  title={`${pageTitle} · Daytona`}
+  description={pageDescription}
+  lang={htmlLang}
+  favicons={pageData.favicons}
+>
+  <Fragment slot="head">
+    <link rel="canonical" href={canonicalPath} />
+    {alternateLinks.map(link => <link rel="alternate" hreflang={link.hreflang} href={link.href} />)}
+    <meta property="og:url" content={canonicalPath} />
+    <meta property="og:locale" content={htmlLang} />
+    <link rel="sitemap" href="/docs/sitemap-index.xml" />
+  </Fragment>
+  <PageFrame hasSidebar={true} lang={locale}>
+    <Fragment slot="header">
+      <Header lang={locale} />
+    </Fragment>
+    <Fragment slot="sidebar">
+      <Sidebar lang={locale} />
+    </Fragment>
+
+    <TwoColumnContent toc={toc}>
+      <Fragment slot="right-sidebar">
+        <TableOfContents toc={toc} />
+      </Fragment>
+
+      <ContentPanel>
+        <PageTitle entry={entry} locale={locale} />
+        <MarkdownContent>
+          <Content components={mdxComponents} />
+        </MarkdownContent>
+        <EditLink editUrl={editUrl} />
+        <Pagination lang={locale} />
+        <Footer lang={locale} />
+      </ContentPanel>
+    </TwoColumnContent>
+  </PageFrame>
+</Layout>

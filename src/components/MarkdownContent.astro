@@ -1,0 +1,307 @@
+<div class="markdown-content"><slot /></div>
+
+<script is:inline>
+  ;(() => {
+    if (typeof window === 'undefined') return
+
+    const state =
+      window.__daytonaMarkdownState ||
+      (window.__daytonaMarkdownState = {
+        initialized: false,
+        isApplyingPreferredCodeLanguage: false,
+      })
+
+    const copiedLabel =
+      document.documentElement.lang === 'ja' ? 'コピーしました！' : 'Copied!'
+    const copyLabel = document.documentElement.lang === 'ja' ? 'コピー' : 'Copy'
+    const preferredCodeLanguageStorageKey =
+      'daytona-docs-preferred-code-language'
+    const tabGroupSelector =
+      '[role="tablist"], [data-component-part="tabs-list"]'
+
+    const normalizeLanguage = value => value?.trim().toLowerCase() ?? ''
+
+    const getTabLanguageLabel = tab => {
+      const dataTestId = tab.getAttribute('data-testid')
+      if (dataTestId?.startsWith('tab-')) {
+        return dataTestId.slice(4)
+      }
+      return tab.textContent?.trim() ?? ''
+    }
+
+    const loadPreferredCodeLanguage = () => {
+      try {
+        return normalizeLanguage(
+          window.localStorage.getItem(preferredCodeLanguageStorageKey)
+        )
+      } catch {
+        return ''
+      }
+    }
+
+    const savePreferredCodeLanguage = language => {
+      if (!language) return
+      try {
+        window.localStorage.setItem(preferredCodeLanguageStorageKey, language)
+      } catch {}
+    }
+
+    const applyPreferredCodeLanguage = preferredLanguage => {
+      const normalized = normalizeLanguage(preferredLanguage)
+      if (!normalized) return
+
+      state.isApplyingPreferredCodeLanguage = true
+      try {
+        document.querySelectorAll(tabGroupSelector).forEach(group => {
+          const tabs = Array.from(group.querySelectorAll('[role="tab"]'))
+          const match = tabs.find(
+            tab => normalizeLanguage(getTabLanguageLabel(tab)) === normalized
+          )
+          if (match && match.getAttribute('aria-selected') !== 'true') {
+            match.click()
+          }
+        })
+      } finally {
+        window.setTimeout(() => {
+          state.isApplyingPreferredCodeLanguage = false
+        }, 0)
+      }
+    }
+
+    const scheduleSync = preferredLanguage => {
+      if (!preferredLanguage) return
+      applyPreferredCodeLanguage(preferredLanguage)
+      let remaining = 20
+      const id = window.setInterval(() => {
+        applyPreferredCodeLanguage(preferredLanguage)
+        if (--remaining <= 0) window.clearInterval(id)
+      }, 200)
+    }
+
+    const attachCopyButtonEffects = root => {
+      root.querySelectorAll('[data-testid="copy-code-button"]').forEach(button => {
+        if (!(button instanceof HTMLButtonElement)) return
+        if (button.dataset.copyEffectBound === 'true') return
+
+        button.dataset.copyEffectBound = 'true'
+        const tooltip = button.nextElementSibling
+        let resetTimeout
+
+        if (button.dataset.copyClipboardBound !== 'true' && button.dataset.code) {
+          button.dataset.copyClipboardBound = 'true'
+          button.addEventListener('click', async () => {
+            if (!navigator.clipboard?.writeText) return
+            try {
+              await navigator.clipboard.writeText(button.dataset.code || '')
+            } catch (error) {
+              console.error(error)
+            }
+          })
+        }
+
+        button.addEventListener('click', () => {
+          button.dataset.copied = 'true'
+          if (tooltip instanceof HTMLElement) {
+            tooltip.textContent = copiedLabel
+            tooltip.dataset.visible = 'true'
+            tooltip.dataset.copied = 'true'
+          }
+
+          window.clearTimeout(resetTimeout)
+          resetTimeout = window.setTimeout(() => {
+            button.dataset.copied = 'false'
+            if (tooltip instanceof HTMLElement) {
+              tooltip.textContent = copyLabel
+              tooltip.dataset.visible = 'false'
+              tooltip.dataset.copied = 'false'
+            }
+          }, 2000)
+        })
+      })
+    }
+
+    const enhanceAstroCodeBlocks = root => {
+      root.querySelectorAll('pre.astro-code').forEach(pre => {
+        if (!(pre instanceof HTMLElement)) return
+        if (pre.parentElement?.classList.contains('astro-code-frame')) return
+        if (pre.closest('.expressive-code, .code-block')) return
+
+        const frame = document.createElement('div')
+        frame.className = 'astro-code-frame'
+
+        const floatingButtons = document.createElement('div')
+        floatingButtons.setAttribute('data-floating-buttons', 'true')
+
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.title = 'Copy to clipboard'
+        button.setAttribute('data-testid', 'copy-code-button')
+        button.setAttribute('aria-label', 'Copy the contents from the code block')
+        button.dataset.code = pre.textContent || ''
+        button.innerHTML = '<div></div>'
+
+        const tooltip = document.createElement('span')
+        tooltip.setAttribute('aria-hidden', 'true')
+        tooltip.textContent = copyLabel
+
+        floatingButtons.appendChild(button)
+        floatingButtons.appendChild(tooltip)
+
+        pre.parentNode?.insertBefore(frame, pre)
+        frame.appendChild(floatingButtons)
+        frame.appendChild(pre)
+      })
+    }
+
+    const wrapTables = root => {
+      root.querySelectorAll('table').forEach(table => {
+        if (table.parentElement?.classList.contains('table-wrapper')) return
+        const wrapperDiv = document.createElement('div')
+        wrapperDiv.classList.add('table-wrapper')
+        table.parentNode?.insertBefore(wrapperDiv, table)
+        wrapperDiv.appendChild(table)
+      })
+    }
+
+    const attachHeadingAnchors = root => {
+      root
+        .querySelectorAll('h2[id], h3[id], h4[id], h5[id]')
+        .forEach(heading => {
+          if (!(heading instanceof HTMLElement)) return
+          if (heading.closest('#scalar-container')) return
+          if (heading.querySelector(':scope > .heading-anchor')) return
+
+          const anchor = document.createElement('a')
+          anchor.href = `#${heading.id}`
+          anchor.className = 'heading-anchor'
+          anchor.setAttribute('aria-hidden', 'true')
+          anchor.textContent = '#'
+          heading.prepend(anchor)
+
+          heading.addEventListener('click', event => {
+            if (event.target === anchor) return
+            document.querySelectorAll('.heading-anchor.visible').forEach(item => {
+              if (item !== anchor) item.classList.remove('visible')
+            })
+            anchor.classList.toggle('visible')
+          })
+
+          anchor.addEventListener('click', () => {
+            anchor.classList.remove('visible')
+          })
+        })
+    }
+
+    const refreshMarkdownContent = root => {
+      const scope = root instanceof HTMLElement ? root : document
+      const containers = scope.matches?.('.markdown-content')
+        ? [scope]
+        : Array.from(scope.querySelectorAll('.markdown-content'))
+
+      if (containers.length === 0 && scope === document) {
+        containers.push(document.querySelector('.markdown-content'))
+      }
+
+      containers
+        .filter(container => container instanceof HTMLElement)
+        .forEach(container => {
+          enhanceAstroCodeBlocks(container)
+          attachCopyButtonEffects(container)
+          wrapTables(container)
+          attachHeadingAnchors(container)
+        })
+
+      const preferredCodeLanguage = loadPreferredCodeLanguage()
+      if (preferredCodeLanguage) {
+        scheduleSync(preferredCodeLanguage)
+      }
+    }
+
+    if (!state.initialized) {
+      document.addEventListener(
+        'click',
+        event => {
+          if (state.isApplyingPreferredCodeLanguage) return
+
+          const target = event.target
+          if (!(target instanceof HTMLElement)) return
+
+          const clickedTab = target.closest(
+            '[role="tab"], [data-component-part="tab-button"]'
+          )
+          if (!(clickedTab instanceof HTMLElement)) return
+
+          const selectedLanguage = normalizeLanguage(
+            getTabLanguageLabel(clickedTab)
+          )
+          if (!selectedLanguage) return
+
+          savePreferredCodeLanguage(selectedLanguage)
+          window.setTimeout(() => {
+            applyPreferredCodeLanguage(selectedLanguage)
+          }, 0)
+        },
+        true
+      )
+
+      document.addEventListener('click', event => {
+        const target = event.target
+        if (!(target instanceof HTMLElement)) return
+        if (target.closest('h2, h3, h4, h5')) return
+
+        document.querySelectorAll('.heading-anchor.visible').forEach(anchor => {
+          anchor.classList.remove('visible')
+        })
+      })
+
+      const observer = new MutationObserver(mutations => {
+        for (const mutation of mutations) {
+          if (
+            mutation.type === 'attributes' &&
+            mutation.target instanceof HTMLElement &&
+            mutation.target.getAttribute('aria-selected') === 'true' &&
+            !state.isApplyingPreferredCodeLanguage
+          ) {
+            const preferredLanguage = loadPreferredCodeLanguage()
+            const selectedLanguage = normalizeLanguage(
+              getTabLanguageLabel(mutation.target)
+            )
+            if (
+              preferredLanguage &&
+              selectedLanguage &&
+              selectedLanguage !== preferredLanguage
+            ) {
+              applyPreferredCodeLanguage(preferredLanguage)
+            }
+          }
+
+          mutation.addedNodes.forEach(node => {
+            if (node instanceof HTMLElement) {
+              refreshMarkdownContent(node)
+            }
+          })
+        }
+      })
+
+      observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['aria-selected'],
+        childList: true,
+        subtree: true,
+      })
+
+      document.addEventListener('astro:page-load', () => {
+        refreshMarkdownContent(document)
+      })
+
+      state.initialized = true
+    }
+
+    const run = () => refreshMarkdownContent(document)
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', run, { once: true })
+    } else {
+      run()
+    }
+  })()
+</script>
