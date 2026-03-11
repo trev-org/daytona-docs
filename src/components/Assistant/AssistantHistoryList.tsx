@@ -5,6 +5,7 @@ import { ChatItem } from './ChatItem';
 interface AssistantHistoryListProps {
   messages: UIMessage[];
   status: 'ready' | 'streaming' | 'submitted' | 'error';
+  errorMessage?: string | null;
 }
 
 const hasVisibleParts = (parts: UIMessage['parts'] | undefined) =>
@@ -13,10 +14,10 @@ const hasVisibleParts = (parts: UIMessage['parts'] | undefined) =>
 
 function LoadingIndicator() {
   return (
-    <div className="flex gap-0.5 items-end h-3 py-2 mb-4">
-      <span className="size-1 bg-zinc-400 rounded-full animate-dot-bounce" />
-      <span className="size-1 bg-zinc-400 rounded-full animate-dot-bounce [animation-delay:0.2s]" />
-      <span className="size-1 bg-zinc-400 rounded-full animate-dot-bounce [animation-delay:0.4s]" />
+    <div className="assistant-loading">
+      <span className="assistant-loading-dot" />
+      <span className="assistant-loading-dot delay-1" />
+      <span className="assistant-loading-dot delay-2" />
     </div>
   );
 }
@@ -24,6 +25,7 @@ function LoadingIndicator() {
 export function AssistantHistoryList({
   messages,
   status,
+  errorMessage,
 }: AssistantHistoryListProps) {
   const isLoading = useMemo(() => {
     if (status === 'submitted') return true;
@@ -44,7 +46,7 @@ export function AssistantHistoryList({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="assistant-history">
       {visibleMessages.map((msg, index) => (
         <ChatItem
           key={msg.id}
@@ -52,6 +54,11 @@ export function AssistantHistoryList({
           isLast={index === visibleMessages.length - 1}
         />
       ))}
+      {errorMessage && (
+        <div className="assistant-response-error">
+          <span>{errorMessage}</span>
+        </div>
+      )}
       {isLoading && <LoadingIndicator />}
     </div>
   );

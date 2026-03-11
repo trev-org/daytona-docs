@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { UIMessage } from '@ai-sdk/react';
-import { cn } from '@mintlify/components';
 
 interface ChatMessageProps extends React.HTMLAttributes<HTMLDivElement> {
   message: UIMessage;
@@ -14,22 +13,13 @@ export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
       .join('');
 
     return (
-      <div className="flex justify-end items-end w-full flex-col gap-2">
+      <div className="assistant-user-row">
         <div
           ref={ref}
-          className={cn(
-            'flex px-3 py-2 items-start gap-4 w-fit rounded-2xl bg-gray-100',
-            className,
-          )}
+          className={['assistant-user-bubble', className].filter(Boolean).join(' ')}
           {...props}
         >
-          <div className="flex items-start gap-4 w-full">
-            <div className="flex flex-col gap-1 w-full">
-              <div className="wrap-break-word hyphens-auto text-base lg:text-sm text-gray-800">
-                {content}
-              </div>
-            </div>
-          </div>
+          {content}
         </div>
       </div>
     );

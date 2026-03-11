@@ -68,17 +68,22 @@ const showAssistant = !!import.meta.env.PUBLIC_MINTLIFY_ASSISTANT_KEY
     <ThemeProvider />
     {showAssistant && <AssistantProvider client:only="react" />}
     {import.meta.env.PROD && <PostHog />}
-    {showAssistant ? (
-      <div style="display:flex">
-        <main style="flex:1;min-width:0">
-          <slot />
-        </main>
-        <AssistantSheet client:only="react" transition:persist />
-      </div>
-    ) : (
-      <main>
-        <slot />
-      </main>
-    )}
+    <main class="site-main">
+      <slot />
+    </main>
+    {showAssistant && <AssistantSheet client:only="react" transition:persist />}
   </body>
 </html>
+
+<style>
+  .site-main {
+    transition: width 0.2s ease;
+  }
+
+  @media (min-width: 1024px) {
+    :global(body[data-assistant-open='true']) .site-main {
+      width: calc(100% - var(--assistant-layout-offset, 0px));
+      max-width: calc(100% - var(--assistant-layout-offset, 0px));
+    }
+  }
+</style>

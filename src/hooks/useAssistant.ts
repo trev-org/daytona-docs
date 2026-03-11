@@ -9,6 +9,7 @@ const API_KEY = import.meta.env.PUBLIC_MINTLIFY_ASSISTANT_KEY;
 export const useAssistant = () => {
   const isClearedRef = useRef(false);
   const [input, setInput] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { threadId, setThreadId, threadKey, setThreadKey } =
     useMessagesStore();
@@ -43,6 +44,7 @@ export const useAssistant = () => {
         };
       },
       fetch: async (url, options) => {
+        setErrorMessage(null);
         const response = await fetch(url, options);
 
         const tempThreadId = response.headers.get('x-thread-id');
@@ -55,6 +57,25 @@ export const useAssistant = () => {
         if (tempThreadKey && !isClearedRef.current) {
           setThreadKey(tempThreadKey);
           sessionStorage.setItem('assistant-threadKey', tempThreadKey);
+        }
+
+        if (!response.ok) {
+          let responseText = '';
+
+          try {
+            responseText = await response.text();
+          } catch {}
+
+          const fallbackMessage =
+            response.status === 401
+              ? 'Assistant authentication failed. Check `PUBLIC_MINTLIFY_ASSISTANT_KEY`; Mintlify assistant keys usually start with `mint_dsc_`.'
+              : response.status === 403
+                ? 'Assistant access was rejected by Mintlify. Please verify your assistant configuration and key.'
+                : `Assistant request failed with status ${response.status}.`;
+
+          const message = responseText.trim() || fallbackMessage;
+          setErrorMessage(message);
+          throw new Error(message);
         }
 
         return response;
@@ -77,6 +98,7 @@ export const useAssistant = () => {
     stop();
     setMessages([]);
     setInput('');
+    setErrorMessage(null);
     setThreadId(undefined);
     setThreadKey(undefined);
     sessionStorage.removeItem('assistant-threadKey');
@@ -87,6 +109,7 @@ export const useAssistant = () => {
   const handleSubmit = useCallback(() => {
     if (!input.trim() || status !== 'ready') return;
     isClearedRef.current = false;
+    setErrorMessage(null);
     sendMessage({ text: input });
     setInput('');
   }, [input, status, sendMessage]);
@@ -102,5 +125,6 @@ export const useAssistant = () => {
     onClear,
     stop,
     threadId,
+    errorMessage,
   };
 };

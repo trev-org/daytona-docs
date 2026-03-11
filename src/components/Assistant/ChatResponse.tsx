@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { cn, Icon } from '@mintlify/components';
+import { Icon } from '@mintlify/components';
 import type { UIMessage } from '@ai-sdk/react';
 
 interface ChatResponseProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -10,6 +10,10 @@ interface ChatResponseProps extends React.HTMLAttributes<HTMLDivElement> {
   isLast?: boolean;
   hasError?: boolean;
 }
+
+const SOURCE_SITE_LABEL = (
+  import.meta.env.PUBLIC_MINTLIFY_SUBDOMAIN || ''
+).trim().toLowerCase();
 
 const normalizePath = (path: string | undefined): string => {
   if (!path) return '/';
@@ -30,8 +34,21 @@ const isLocalUrl = (url: string | undefined): boolean => {
   );
 };
 
-const CopyButtonClassName =
-  'rounded-lg p-1.5 hover:bg-gray-100 cursor-pointer text-gray-500';
+const getResultTitle = (result: any): string => {
+  const title =
+    typeof result?.metadata?.title === 'string' ? result.metadata.title.trim() : '';
+
+  if (title) return title;
+
+  const path = typeof result?.path === 'string' ? result.path.trim() : '';
+  if (!path) return '';
+
+  const normalizedPath = path.replace(/^\/+|\/+$/g, '');
+  if (!normalizedPath) return '';
+
+  const segments = normalizedPath.split('/');
+  return segments[segments.length - 1] || normalizedPath;
+};
 
 const CopyButton = ({ content }: { content: string }) => {
   const [copied, setCopied] = useState(false);
@@ -46,41 +63,18 @@ const CopyButton = ({ content }: { content: string }) => {
 
   return (
     <button
-      className={CopyButtonClassName}
+      className="assistant-copy-button"
       onClick={handleCopy}
       aria-label="Copy response"
     >
       {copied ? (
-        <Icon icon="check" iconLibrary="lucide" color="green" size={16} />
+        <Icon icon="check" iconLibrary="lucide" color="currentColor" size={16} />
       ) : (
-        <Icon icon="copy" iconLibrary="lucide" color="dimgray" size={16} />
+        <Icon icon="copy" iconLibrary="lucide" color="currentColor" size={16} />
       )}
     </button>
   );
 };
-
-const ShimmerText = ({ children }: { children: React.ReactNode }) => (
-  <>
-    <span
-      className="animate-shimmer bg-size-[200%_100%] bg-clip-text text-transparent font-medium"
-      style={{
-        backgroundImage:
-          'linear-gradient(90deg, rgb(156 163 175) 0%, rgb(209 213 219) 50%, rgb(156 163 175) 100%)',
-      }}
-    >
-      {children}
-    </span>
-    <style>{`
-      @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-      }
-      .animate-shimmer {
-        animation: shimmer 2s infinite linear;
-      }
-    `}</style>
-  </>
-);
 
 const SearchingContainer = ({
   query,
@@ -93,54 +87,49 @@ const SearchingContainer = ({
   const hasResults = children != null;
 
   return (
-    <>
+    <div className="assistant-searching">
       <button
-        className={cn(
-          'group flex items-center text-left gap-2.5 text-gray-500 shrink-0 hover:text-gray-600 transition-colors',
-          hasResults ? 'cursor-pointer' : 'cursor-default',
-        )}
+        className={`assistant-searching-toggle${hasResults ? '' : ' is-static'}`}
         onClick={() => {
           if (!hasResults) return;
           setIsSourcesOpen(!isSourcesOpen);
         }}
       >
-        {!isSourcesOpen && (
-          <span className="shrink-0 group-hover:hidden">
-            <Icon
-              icon="search"
-              iconLibrary="lucide"
-              size={12}
-              color="dimgray"
-            />
-          </span>
-        )}
-        {hasResults && (
-          <span
-            className={cn(
-              'shrink-0',
-              isSourcesOpen ? 'rotate-90' : 'hidden group-hover:block',
-            )}
-          >
-            <Icon
-              icon="chevron-right"
-              iconLibrary="lucide"
-              color="dimgray"
-              size={15}
-            />
-          </span>
-        )}
-        <span className="text-base sm:text-sm flex items-center gap-1.5">
-          {!hasResults ? (
-            <ShimmerText>{`Searching for ${query}`}</ShimmerText>
-          ) : (
-            <span className="font-medium">{`Found results for ${query}`}</span>
+        <span className="assistant-searching-label">
+          {!isSourcesOpen && (
+            <span>
+              <Icon
+                icon="search"
+                iconLibrary="lucide"
+                size={12}
+                color="currentColor"
+              />
+            </span>
           )}
+          {hasResults && (
+            <span
+              style={{
+                transform: isSourcesOpen ? 'rotate(90deg)' : undefined,
+                display: 'inline-flex',
+              }}
+            >
+              <Icon
+                icon="chevron-right"
+                iconLibrary="lucide"
+                color="currentColor"
+                size={15}
+              />
+            </span>
+          )}
+          <span>
+            {!hasResults ? `Searching for ${query}` : `Found results for ${query}`}
+          </span>
         </span>
       </button>
       {isSourcesOpen && (
-        <div className="pl-6 pt-0.5 not-prose">{children}</div>
+        <div className="assistant-searching-sources">{children}</div>
       )}
-    </>
+    </div>
   );
 };
 
@@ -160,19 +149,14 @@ const ChatSuggestions = ({ markdownLinks }: { markdownLinks: string }) => {
     .filter((link) => link !== undefined);
 
   return (
-    <div className="flex flex-col gap-3 not-prose">
+    <div className="assistant-searching-sources">
       {links.map((link, idx) => {
         const href = isLocalUrl(link.path)
           ? normalizePath(link.path)
           : link.path;
         return (
-          <a key={idx} href={href} className="block">
-            <span
-              className="flex items-center text-sm hover:brightness-75"
-              style={{ color: 'var(--primary)' }}
-            >
-              <span className="truncate font-medium">{link.label}</span>
-            </span>
+          <a key={idx} href={href} className="assistant-suggestion-link">
+            {link.label}
           </a>
         );
       })}
@@ -182,56 +166,47 @@ const ChatSuggestions = ({ markdownLinks }: { markdownLinks: string }) => {
 
 const MarkdownContent = ({ text }: { text: string }) => {
   return (
-    <div className="prose prose-sm overflow-x-auto pb-1 max-w-none text-base lg:text-sm [&_p]:text-base lg:[&_p]:text-sm [&_li]:text-base lg:[&_li]:text-sm [&_ul]:text-base lg:[&_ul]:text-sm [&_ol]:text-base lg:[&_ol]:text-sm">
+    <div className="assistant-markdown">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          h1: ({ children }) => (
-            <h1 className="text-lg font-semibold text-gray-950">{children}</h1>
-          ),
-          h2: ({ children }) => (
-            <h2 className="text-base font-semibold text-gray-950">
-              {children}
-            </h2>
-          ),
-          h3: ({ children }) => (
-            <h3 className="text-base font-semibold text-gray-950">
-              {children}
-            </h3>
-          ),
-          h4: ({ children }) => (
-            <h4 className="text-base font-semibold text-gray-950">
-              {children}
-            </h4>
-          ),
-          h5: ({ children }) => (
-            <h5 className="text-base font-semibold text-gray-950">
-              {children}
-            </h5>
-          ),
-          h6: ({ children }) => (
-            <h6 className="text-base font-semibold text-gray-950">
-              {children}
-            </h6>
-          ),
+          h1: ({ children }) => <h1>{children}</h1>,
+          h2: ({ children }) => <h2>{children}</h2>,
+          h3: ({ children }) => <h3>{children}</h3>,
+          h4: ({ children }) => <h4>{children}</h4>,
+          h5: ({ children }) => <h5>{children}</h5>,
+          h6: ({ children }) => <h6>{children}</h6>,
           a: ({ href, children, ...props }) => {
             const isLocal = isLocalUrl(href);
             const normalizedHref = isLocal ? normalizePath(href) : href;
             return (
               <a
                 href={normalizedHref}
+                className={isLocal ? undefined : 'assistant-external-link'}
                 target={isLocal ? undefined : '_blank'}
                 rel={isLocal ? undefined : 'noopener noreferrer'}
-                className="text-primary hover:underline"
                 {...props}
               >
                 {children}
               </a>
             );
           },
-          p: ({ children }) => (
-            <p className="whitespace-pre-line">{children}</p>
-          ),
+          p: ({ node, children }) => {
+            const parentNode = (node as { parent?: { tagName?: string } } | undefined)
+              ?.parent;
+            const parentTagName =
+              parentNode && 'tagName' in parentNode ? parentNode.tagName : undefined;
+
+            if (parentTagName === 'li') {
+              return (
+                <span className="assistant-markdown-inline-paragraph">
+                  {children}
+                </span>
+              );
+            }
+
+            return <p>{children}</p>;
+          },
           pre: ({ children, ...props }) => {
             if (
               typeof children === 'object' &&
@@ -245,17 +220,7 @@ const MarkdownContent = ({ text }: { text: string }) => {
               return children;
             }
 
-            return (
-              <pre
-                {...props}
-                className={cn(
-                  'p-3 text-sm rounded-xl text-gray-950 bg-white border border-gray-200/70 overflow-x-auto',
-                  props.className,
-                )}
-              >
-                {children}
-              </pre>
-            );
+            return <pre {...props}>{children}</pre>;
           },
           code: ({ inline, children, ...props }: any) => {
             if (!inline && 'className' in props) {
@@ -266,16 +231,7 @@ const MarkdownContent = ({ text }: { text: string }) => {
               }
             }
 
-            return inline ? (
-              <code
-                className="px-1 py-0.5 rounded bg-gray-100 text-sm"
-                {...props}
-              >
-                {children}
-              </code>
-            ) : (
-              <code {...props}>{children}</code>
-            );
+            return inline ? <code {...props}>{children}</code> : <code {...props}>{children}</code>;
           },
         }}
       >
@@ -307,10 +263,12 @@ export const ChatResponse = React.forwardRef<HTMLDivElement, ChatResponseProps>(
 
     if (hasError) {
       return (
-        <div ref={ref} className={cn('py-4 text-sm', className)} {...props}>
-          <span>
-            Sorry, we could not generate a response to your question.
-          </span>
+        <div
+          ref={ref}
+          className={['assistant-response-error', className].filter(Boolean).join(' ')}
+          {...props}
+        >
+          <span>Sorry, we could not generate a response to your question.</span>
         </div>
       );
     }
@@ -323,7 +281,7 @@ export const ChatResponse = React.forwardRef<HTMLDivElement, ChatResponseProps>(
       return (
         <div
           ref={ref}
-          className={cn('flex flex-col py-4 gap-4 self-stretch', className)}
+          className={['assistant-response', className].filter(Boolean).join(' ')}
           {...props}
         >
           {message.parts.map((part, index) => {
@@ -371,30 +329,45 @@ export const ChatResponse = React.forwardRef<HTMLDivElement, ChatResponseProps>(
                   ? part.output.results
                   : [];
 
+              const displayResults = results
+                .map((result: any) => {
+                  const label = getResultTitle(result);
+                  const href = normalizePath(result.path);
+
+                  return {
+                    label,
+                    href,
+                    dedupeKey: `${label.toLowerCase()}::${href}`,
+                  };
+                })
+                .filter((result) => {
+                  if (!result.label) return false;
+                  return result.label.trim().toLowerCase() !== SOURCE_SITE_LABEL;
+                })
+                .filter((result, index, array) => {
+                  return (
+                    array.findIndex(
+                      (candidate) => candidate.dedupeKey === result.dedupeKey,
+                    ) === index
+                  );
+                });
+
               return (
                 <div
                   key={`${toolCallId}-result`}
-                  className={cn(
-                    'flex flex-col gap-3',
-                    results.length === 0 && 'hidden',
-                  )}
+                  style={{
+                    display: displayResults.length === 0 ? 'none' : undefined,
+                  }}
                 >
                   <SearchingContainer query={query}>
-                    <div className="flex gap-1 flex-col">
-                      {results.map((result: any, idx: number) => (
+                    <div className="assistant-searching-sources">
+                      {displayResults.map((result, idx: number) => (
                         <a
                           key={idx}
-                          href={normalizePath(result.path)}
-                          className="block py-1"
+                          href={result.href}
+                          className="assistant-source-link"
                         >
-                          <span
-                            className="flex items-center text-sm font-normal hover:brightness-75"
-                            style={{ color: 'var(--primary)' }}
-                          >
-                            <span className="truncate">
-                              {result.metadata?.title || result.path}
-                            </span>
-                          </span>
+                          {result.label}
                         </a>
                       ))}
                     </div>
@@ -405,10 +378,8 @@ export const ChatResponse = React.forwardRef<HTMLDivElement, ChatResponseProps>(
             return null;
           })}
           {content && (
-            <div className="flex items-start gap-2 w-full">
-              <div className="flex items-center gap-1">
-                <CopyButton content={content} />
-              </div>
+            <div className="assistant-response-footer">
+              <CopyButton content={content} />
             </div>
           )}
         </div>
@@ -418,15 +389,13 @@ export const ChatResponse = React.forwardRef<HTMLDivElement, ChatResponseProps>(
     return (
       <div
         ref={ref}
-        className={cn('flex flex-col py-4 gap-4 self-stretch', className)}
+        className={['assistant-response', className].filter(Boolean).join(' ')}
         {...props}
       >
         <ChatMarkdown text={content} />
         {content && (
-          <div className="flex items-start gap-2 w-full">
-            <div className="flex items-center gap-1">
-              <CopyButton content={content} />
-            </div>
+          <div className="assistant-response-footer">
+            <CopyButton content={content} />
           </div>
         )}
       </div>

@@ -1,22 +1,50 @@
 import { Icon } from '@mintlify/components';
 import { toggleAssistant } from './events';
 
-export function AssistantButton() {
+function closeMobileMenu() {
+  const menuButton = document.querySelector('starlight-menu-button');
+  if (menuButton?.getAttribute('aria-expanded') === 'true') {
+    menuButton.setAttribute('aria-expanded', 'false');
+    document.body.removeAttribute('data-mobile-menu-expanded');
+  }
+}
+
+interface AssistantButtonProps {
+  className?: string;
+  buttonClassName?: string;
+  showLabel?: boolean;
+  label?: string;
+}
+
+export function AssistantButton({
+  className,
+  buttonClassName,
+  showLabel = false,
+  label = 'Ask AI',
+}: AssistantButtonProps = {}) {
+  const handleClick = () => {
+    closeMobileMenu();
+    toggleAssistant();
+  };
+
   return (
-    <button
-      onClick={toggleAssistant}
-      type="button"
-      className="flex items-center justify-center gap-1.5 pl-3 pr-3.5 h-9 rounded-xl shadow-sm bg-white ring-1 ring-gray-400/20 hover:ring-gray-600/25 transition-all"
-      aria-label="Toggle AI Assistant"
-    >
-      <Icon
-        icon="sparkles"
-        iconLibrary="lucide"
-        size={16}
-        color="dimgray"
-        className="shrink-0"
-      />
-      <span className="text-sm text-gray-500 whitespace-nowrap">Ask AI</span>
-    </button>
+    <div className={['nav-item', 'assistant', className].filter(Boolean).join(' ')}>
+      <button
+        onClick={handleClick}
+        type="button"
+        className={['nav__link', buttonClassName].filter(Boolean).join(' ')}
+        aria-label={label}
+        title={label}
+      >
+        <Icon
+          icon="sparkles"
+          iconLibrary="lucide"
+          size={16}
+          color="currentColor"
+          className="shrink-0"
+        />
+        {showLabel && <span>{label}</span>}
+      </button>
+    </div>
   );
 }

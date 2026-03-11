@@ -55,16 +55,17 @@ import closeXIcon from '@assets/icons/closeX.svg?raw'
   button {
     display: none;
     position: fixed;
-    top: 20px;
+    top: 16px;
     inset-inline-end: var(--sl-nav-pad-x);
-    z-index: var(--sl-z-index-navbar);
+    z-index: 1001;
     width: 34px;
     height: 34px;
-    padding: 0.5rem;
-    background-color: unset;
+    padding: 0;
+    background: var(--block-bg-color);
     border: var(--border);
+    border-radius: 3px;
     cursor: pointer;
-    right: 40px;
+    right: 24px;
     align-items: center;
     justify-content: center;
     color: var(--primary-text-color);
@@ -94,6 +95,7 @@ import closeXIcon from '@assets/icons/closeX.svg?raw'
     }
     @media (max-width: 650px) {
       right: 20px;
+      top: 20px;
     }
   }
   [aria-expanded='true'] button {
@@ -120,6 +122,11 @@ import closeXIcon from '@assets/icons/closeX.svg?raw'
 <style is:global>
   [data-mobile-menu-expanded] {
     overflow: auto;
+  }
+
+  body[data-assistant-compact-nav='true'] starlight-menu-button button {
+    display: flex;
+    right: calc(var(--assistant-layout-offset, 0px) + 24px);
   }
 
   @media (max-width: 1024px) {

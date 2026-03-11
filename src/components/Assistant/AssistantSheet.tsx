@@ -7,6 +7,7 @@ import { AssistantEmptyState } from './AssistantEmptyState';
 import { AssistantHistoryList } from './AssistantHistoryList';
 import { AssistantTextArea } from './AssistantTextArea';
 import { ASSISTANT_EVENTS } from './events';
+import '../../styles/components/assistant.scss';
 
 const CHAT_SHEET_MIN_WIDTH = 368;
 const CHAT_SHEET_MAX_WIDTH = 576;
@@ -44,6 +45,7 @@ function AssistantSheetClient() {
     handleSubmit,
     isLoading,
     onClear,
+    errorMessage,
   } = useAssistant();
 
   const handleClose = useCallback(() => {
@@ -116,6 +118,65 @@ function AssistantSheetClient() {
     }
   }, [isMobile, isOpen]);
 
+  useEffect(() => {
+    const { body } = document;
+
+    if (!isMobile && isOpen) {
+      body.dataset.assistantOpen = 'true';
+      body.style.setProperty('--assistant-layout-offset', `${width}px`);
+    } else {
+      delete body.dataset.assistantOpen;
+      body.style.removeProperty('--assistant-layout-offset');
+    }
+
+    return () => {
+      delete body.dataset.assistantOpen;
+      body.style.removeProperty('--assistant-layout-offset');
+    };
+  }, [isMobile, isOpen, width]);
+
+  useEffect(() => {
+    const { body } = document;
+
+    if (isMobile || !isOpen) {
+      delete body.dataset.assistantCompactNav;
+      return;
+    }
+
+    let frameId = 0;
+
+    const updateCompactNav = () => {
+      const desktopNav = document.querySelector('.navbar .desktop-only');
+
+      if (!(desktopNav instanceof HTMLElement)) {
+        delete body.dataset.assistantCompactNav;
+        return;
+      }
+
+      const shouldUseCompactNav = desktopNav.scrollWidth > desktopNav.clientWidth + 1;
+
+      if (shouldUseCompactNav) {
+        body.dataset.assistantCompactNav = 'true';
+      } else {
+        delete body.dataset.assistantCompactNav;
+      }
+    };
+
+    const scheduleUpdate = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(updateCompactNav);
+    };
+
+    scheduleUpdate();
+    window.addEventListener('resize', scheduleUpdate);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', scheduleUpdate);
+      delete body.dataset.assistantCompactNav;
+    };
+  }, [isMobile, isOpen, width]);
+
   const handleSubmitAndFocus = () => {
     handleSubmit();
     setShouldFocus(!isMobile);
@@ -127,33 +188,24 @@ function AssistantSheetClient() {
     setWidth(isMaximized ? CHAT_SHEET_MIN_WIDTH : CHAT_SHEET_MAX_WIDTH);
   }, [isMaximized]);
 
-  const getOuterClassName = () => {
-    if (isMobile) {
-      return 'fixed inset-0 z-[100]';
-    }
-    return cn('sticky top-0 h-screen shrink-0 z-[50]', 'bg-white');
-  };
+  const rootClassName = cn('assistant-root', isMobile ? 'is-mobile' : '');
 
   const sheetContent = (
     <div
       suppressHydrationWarning
-      className={cn(getOuterClassName(), 'print:hidden')}
+      className={cn(rootClassName, !isOpen && 'is-hidden')}
       style={{
         width: isMobile ? undefined : isOpen ? `${width}px` : 0,
         minWidth: isMobile || !isOpen ? undefined : `${CHAT_SHEET_MIN_WIDTH}px`,
         maxWidth: isMobile || !isOpen ? undefined : `${CHAT_SHEET_MAX_WIDTH}px`,
-        marginLeft: !isMobile && isOpen ? '32px' : undefined,
-        pointerEvents: isMobile && !isOpen ? 'none' : undefined,
+        pointerEvents: !isOpen ? 'none' : undefined,
         overflow: !isOpen ? 'hidden' : undefined,
         visibility: !isOpen ? 'hidden' : undefined,
       }}
     >
       {isMobile && (
         <div
-          className={cn(
-            'absolute inset-0 bg-black/40 transition-opacity duration-200 z-1',
-            isOpen ? 'opacity-100' : 'opacity-0',
-          )}
+          className={cn('assistant-backdrop', isOpen && 'is-open')}
           onClick={handleClose}
         />
       )}
@@ -161,13 +213,8 @@ function AssistantSheetClient() {
       <div
         ref={sheetRef}
         className={cn(
-          'flex flex-col overflow-hidden shrink-0',
-          isMobile
-            ? 'overscroll-contain bg-white z-10'
-            : 'h-full bg-white border-l border-gray-200',
-          isMobile &&
-            !isDragging &&
-            'transition-transform duration-200 ease-out',
+          'assistant-sheet',
+          isMobile && !isDragging && 'is-mobile-ready',
         )}
         style={
           isMobile
@@ -188,105 +235,100 @@ function AssistantSheetClient() {
         }
       >
         {isMobile && (
-          <div className="flex justify-center pt-3 touch-none">
-            <div className="w-10 h-1 rounded-full bg-gray-300" />
+          <div className="assistant-drag-handle-wrap">
+            <div className="assistant-drag-handle" />
           </div>
         )}
         <div
-          className={cn(
-            'w-full flex flex-col flex-1 min-h-0',
-            isMobile ? 'pt-0' : 'pt-3',
-          )}
+          className={cn('assistant-body', !isMobile && 'desktop')}
         >
-          <div className="flex items-center justify-between pb-3 px-4">
-            <div className="flex items-center gap-2">
+          <div className="assistant-header">
+            <div className="assistant-title">
               <Icon
                 icon="sparkles"
                 iconLibrary="lucide"
-                color="var(--primary)"
+                color="var(--hover-color)"
                 size={20}
               />
-              <span className="font-medium text-gray-900">Assistant</span>
+              <span className="assistant-title-text">Assistant</span>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="assistant-actions">
               {!isMobile && (
                 <button
                   onClick={toggleMaximize}
-                  className="group size-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                  className="assistant-icon-button"
                   aria-label={isMaximized ? 'Minimize' : 'Maximize'}
                 >
-                  <span className="flex items-center justify-center text-gray-500 group-hover:text-gray-700 transition-colors">
-                    {isMaximized ? (
-                      <Icon
-                        icon="minimize-2"
-                        iconLibrary="lucide"
-                        size={14}
-                        color="currentColor"
-                      />
-                    ) : (
-                      <Icon
-                        icon="maximize-2"
-                        iconLibrary="lucide"
-                        size={14}
-                        color="currentColor"
-                      />
-                    )}
-                  </span>
+                  {isMaximized ? (
+                    <Icon
+                      icon="minimize-2"
+                      iconLibrary="lucide"
+                      size={14}
+                      color="currentColor"
+                    />
+                  ) : (
+                    <Icon
+                      icon="maximize-2"
+                      iconLibrary="lucide"
+                      size={14}
+                      color="currentColor"
+                    />
+                  )}
                 </button>
               )}
               {messages.length > 0 && (
                 <button
                   onClick={onClear}
-                  className="group size-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                  className="assistant-icon-button"
                   aria-label="Clear chat"
                 >
-                  <span className="flex items-center justify-center text-gray-500 group-hover:text-gray-700 transition-colors">
-                    <Icon
-                      icon="trash"
-                      iconLibrary="lucide"
-                      size={14}
-                      color="currentColor"
-                    />
-                  </span>
+                  <Icon
+                    icon="trash"
+                    iconLibrary="lucide"
+                    size={14}
+                    color="currentColor"
+                  />
                 </button>
               )}
               <button
                 onClick={handleClose}
-                className="group size-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                className="assistant-icon-button"
                 aria-label="Close"
               >
-                <span className="flex items-center justify-center text-gray-500 group-hover:text-gray-700 transition-colors">
-                  <Icon
-                    icon="x"
-                    iconLibrary="lucide"
-                    size={16}
-                    color="currentColor"
-                  />
-                </span>
+                <Icon
+                  icon="x"
+                  iconLibrary="lucide"
+                  size={16}
+                  color="currentColor"
+                />
               </button>
             </div>
           </div>
 
           <div
             ref={messagesRef}
-            className="flex flex-col-reverse flex-1 overflow-y-auto overflow-x-hidden relative px-5 min-h-0"
+            className={cn('assistant-messages', isDragging && 'is-dragging')}
             style={
               isDragging
                 ? { overflow: 'hidden', touchAction: 'none' }
                 : undefined
             }
           >
-            <div className="grow" />
-            {messages.length > 0 ? (
-              <AssistantHistoryList messages={messages} status={status} />
+            <div className="assistant-grow" />
+            {messages.length > 0 || errorMessage ? (
+              <AssistantHistoryList
+                messages={messages}
+                status={status}
+                errorMessage={errorMessage}
+              />
             ) : (
               <AssistantEmptyState />
             )}
-            <div ref={topBoundaryRef} className="h-px w-full shrink-0" />
+            <div ref={topBoundaryRef} className="assistant-top-boundary" />
           </div>
 
-          <div className="px-4 pb-4 shrink-0 border-t border-gray-100 pt-4">
+          <div className="assistant-composer">
             <AssistantTextArea
               value={input}
               onChange={setInput}
@@ -302,9 +344,5 @@ function AssistantSheetClient() {
     </div>
   );
 
-  if (isMobile) {
-    return createPortal(sheetContent, document.body);
-  }
-
-  return sheetContent;
+  return createPortal(sheetContent, document.body);
 }

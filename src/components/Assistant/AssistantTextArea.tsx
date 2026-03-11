@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { cn, Icon } from '@mintlify/components';
+import { Icon } from '@mintlify/components';
 
 interface AssistantTextAreaProps {
   value: string;
@@ -38,7 +38,7 @@ export function AssistantTextArea({
   };
 
   return (
-    <div className="relative">
+    <div className="assistant-composer-inner">
       <textarea
         ref={textareaRef}
         value={value}
@@ -46,51 +46,25 @@ export function AssistantTextArea({
         onKeyDown={handleKeyDown}
         placeholder="Ask a question..."
         rows={2}
-        className={cn(
-          'w-full py-3 pr-10 pl-3 rounded-xl resize-none outline-none',
-          isMobile ? 'text-base' : 'text-sm',
-          'border border-gray-200',
-          'bg-white',
-          'text-gray-900',
-          'placeholder:text-gray-400',
-          'focus:ring-2 min-h-[48px] transition-shadow',
-        )}
+        className="assistant-textarea"
         style={
           {
-            '--tw-ring-color':
-              'color-mix(in srgb, var(--primary) 20%, transparent)',
             resize: 'none',
             fontSize: isMobile ? '16px' : undefined,
           } as React.CSSProperties
         }
-        onFocus={(e) => {
-          e.currentTarget.style.borderColor = 'var(--primary)';
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.borderColor = '';
-        }}
       />
       <button
         type="button"
         onClick={onSubmit}
         disabled={disabled}
-        className={cn(
-          'absolute right-2 bottom-3 w-6 h-6 rounded-full flex items-center justify-center transition-all text-white',
-          disabled
-            ? 'cursor-not-allowed'
-            : 'hover:brightness-90 cursor-pointer',
-        )}
-        style={{
-          backgroundColor: disabled
-            ? 'color-mix(in srgb, var(--primary) 30%, transparent)'
-            : 'var(--primary)',
-        }}
+        className="assistant-send-button"
         aria-label="Send message"
       >
         {isLoading ? (
-          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <span className="assistant-spinner" />
         ) : (
-          <Icon icon="arrow-up" color="white" iconLibrary="lucide" size={16} />
+          <Icon icon="arrow-up" color="currentColor" iconLibrary="lucide" size={16} />
         )}
       </button>
     </div>

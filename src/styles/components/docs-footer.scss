@@ -66,7 +66,7 @@
       gap: 24px;
 
       @include for-mobile-screen-sizes {
-        flex: 1 1 50%;
+        flex: 0 1 auto;
       }
 
       p {
@@ -102,6 +102,7 @@
 
       @include for-mobile-screen-sizes {
         order: 2;
+        flex-basis: 100%;
         gap: 20px;
       }
 
@@ -119,6 +120,13 @@
           }
         }
       }
+    }
+  }
+
+  @include for-mobile-screen-sizes {
+    .footer-selects {
+      order: 1;
+      margin-left: auto;
     }
   }
 }

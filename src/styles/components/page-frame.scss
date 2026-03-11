@@ -16,4 +16,10 @@
   @include for-mobile-screen-sizes {
     margin: 0 20px;
   }
+
+  body[data-assistant-open="true"] & {
+    @media screen and (min-width: #{$screen-lg + 1}) {
+      margin: 0 28px;
+    }
+  }
 }

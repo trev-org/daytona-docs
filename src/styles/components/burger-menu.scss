@@ -389,10 +389,12 @@ $hamburger-types: (
     background: #007fff33;
     text-align: center;
     border-radius: 3px;
+    cursor: pointer;
 
     a {
       line-height: 2.14;
       color: #007fff;
+      cursor: pointer;
     }
   }
 

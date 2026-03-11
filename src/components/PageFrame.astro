@@ -145,4 +145,48 @@ const hasSidebar = originalHasSidebar && !isApiPage
       padding-top: calc(48px + var(--sl-mobile-toc-height));
     }
   }
+
+  :global(body[data-assistant-open='true']) .header-wrapper::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-bottom: var(--border);
+    pointer-events: none;
+  }
+
+  :global(body[data-assistant-open='true']) .navbar nav {
+    border-bottom: 0;
+  }
+
+  :global(body[data-assistant-compact-nav='true']) .grid-template {
+    grid-template-columns: 100%;
+  }
+
+  :global(body[data-assistant-compact-nav='true'][data-has-sidebar]) .header {
+    padding-inline-end: calc(
+      var(--sl-nav-gap) + var(--sl-nav-pad-x) + var(--sl-menu-button-size)
+    );
+  }
+
+  :global(body[data-assistant-compact-nav='true']) .sidebar-pane {
+    display: none;
+    --sl-sidebar-visibility: hidden;
+    z-index: 5;
+    padding-top: 55px;
+    position: fixed;
+    right: 0;
+    width: 75vw;
+    border-left: 1px solid var(--border-extra);
+    padding-left: 20px;
+    padding-right: 20px;
+    top: 0;
+    max-height: unset;
+  }
+
+  :global(body[data-assistant-compact-nav='true']) [aria-expanded='true'] ~ .sidebar-pane {
+    --sl-sidebar-visibility: visible;
+    display: block;
+  }
 </style>

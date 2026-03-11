@@ -44,7 +44,14 @@ async function searchDocs(query, locale) {
   )
 
   if (!response.ok) {
-    throw new Error(`Search request failed with status ${response.status}`)
+    const message =
+      response.status === 401
+        ? 'Search authentication failed. Check `PUBLIC_MINTLIFY_ASSISTANT_KEY`; Mintlify assistant keys usually start with `mint_dsc_`.'
+        : response.status === 403
+          ? 'Search access was rejected by Mintlify. Please verify your assistant configuration and key.'
+          : `Search request failed with status ${response.status}`
+
+    throw new Error(message)
   }
 
   const data = await response.json()
@@ -160,7 +167,9 @@ function Search({ locale = 'en' }) {
       } catch (err) {
         console.error(err)
         setResults([])
-        setError('Search is temporarily unavailable.')
+        setError(
+          err instanceof Error ? err.message : 'Search is temporarily unavailable.'
+        )
       } finally {
         setIsLoading(false)
       }
