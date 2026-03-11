@@ -4,6 +4,7 @@ import '../styles/components/search.scss'
 
 const SUBDOMAIN = import.meta.env.PUBLIC_MINTLIFY_SUBDOMAIN || ''
 const ASSISTANT_KEY = import.meta.env.PUBLIC_MINTLIFY_ASSISTANT_KEY || ''
+const PAGE_SIZE = 10
 
 function normalizeLocale(locale) {
   return locale === 'ja' ? 'jp' : locale
@@ -22,6 +23,13 @@ function normalizeResultPath(path, locale) {
   return `/docs/${normalized}`
 }
 
+function extractSlug(path) {
+  if (!path) return ''
+  let slug = path.startsWith('/') ? path : `/${path}`
+  slug = slug.replace(/\/index$/, '')
+  return slug.toUpperCase()
+}
+
 async function searchDocs(query, locale) {
   if (!SUBDOMAIN) return []
 
@@ -35,7 +43,7 @@ async function searchDocs(query, locale) {
       },
       body: JSON.stringify({
         query,
-        pageSize: 10,
+        pageSize: 50,
         filter: {
           language: locale,
         },
@@ -59,6 +67,7 @@ async function searchDocs(query, locale) {
     id: item.path || `${item.metadata?.title || 'result'}-${idx}`,
     title: item.metadata?.title || 'Untitled',
     description: item.metadata?.description || item.content || '',
+    slug: extractSlug(item.path),
     url: normalizeResultPath(item.path, locale),
   }))
 }
@@ -69,9 +78,13 @@ function Search({ locale = 'en' }) {
   const [isLoading, setIsLoading] = useState(false)
   const [results, setResults] = useState([])
   const [error, setError] = useState('')
+  const [page, setPage] = useState(0)
   const searchWrapperRef = useRef(null)
   const debounceTimeoutRef = useRef(null)
   const effectiveLocale = normalizeLocale(locale || 'en')
+
+  const totalPages = Math.ceil(results.length / PAGE_SIZE)
+  const pagedResults = results.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   useEffect(() => {
     const toggleSearch = () => {
@@ -81,6 +94,7 @@ function Search({ locale = 'en' }) {
           setResults([])
           setError('')
           setIsLoading(false)
+          setPage(0)
         }
         return !prev
       })
@@ -96,6 +110,7 @@ function Search({ locale = 'en' }) {
         setResults([])
         setError('')
         setIsLoading(false)
+        setPage(0)
       }
     }
 
@@ -118,6 +133,7 @@ function Search({ locale = 'en' }) {
         setResults([])
         setError('')
         setIsLoading(false)
+        setPage(0)
       }
     }
 
@@ -155,12 +171,14 @@ function Search({ locale = 'en' }) {
       setResults([])
       setError('')
       setIsLoading(false)
+      setPage(0)
       return
     }
 
     debounceTimeoutRef.current = setTimeout(async () => {
       setIsLoading(true)
       setError('')
+      setPage(0)
       try {
         const nextResults = await searchDocs(searchQuery.trim(), effectiveLocale)
         setResults(nextResults)
@@ -187,17 +205,18 @@ function Search({ locale = 'en' }) {
     setIsSearchVisible(false)
   }
 
+  const closeSearch = () => {
+    setIsSearchVisible(false)
+    setSearchQuery('')
+    setResults([])
+    setError('')
+    setIsLoading(false)
+    setPage(0)
+  }
+
   if (!isSearchVisible) return null
 
-  const statusText = isLoading
-    ? 'Searching...'
-    : error
-      ? error
-      : searchQuery.trim() && results.length === 0
-        ? `No results found for "${searchQuery}"`
-        : searchQuery.trim() && results.length > 0
-          ? `${results.length} result${results.length === 1 ? '' : 's'}`
-          : 'Start typing to search the docs'
+  const hasResults = !isLoading && !error && results.length > 0
 
   return (
     <div className="search-overlay">
@@ -214,36 +233,78 @@ function Search({ locale = 'en' }) {
             <button
               type="button"
               className="search-close-button"
-              onClick={() => setIsSearchVisible(false)}
+              onClick={closeSearch}
               aria-label="Close search"
             >
-              Esc
+              ×
             </button>
           </div>
-          <div className="search-status">{statusText}</div>
+          {isLoading && (
+            <div className="search-status">Searching...</div>
+          )}
+          {error && (
+            <div className="search-status search-status-error">{error}</div>
+          )}
+          {!isLoading && !error && searchQuery.trim() && results.length === 0 && (
+            <div className="search-status">No results found for "{searchQuery}"</div>
+          )}
+          {!isLoading && !error && !searchQuery.trim() && (
+            <div className="search-status">Start typing to search the docs</div>
+          )}
         </div>
-        <div className="search-content">
-          {!isLoading && !error && results.length > 0 && (
+
+        {hasResults && (
+          <div className="search-content">
+            <div className="search-results-header">
+              <span className="search-results-count">
+                Documentation ({results.length} result{results.length === 1 ? '' : 's'})
+              </span>
+              {totalPages > 1 && (
+                <div className="search-pagination">
+                  <button
+                    type="button"
+                    disabled={page === 0}
+                    onClick={() => setPage(p => p - 1)}
+                    aria-label="Previous page"
+                  >
+                    ‹
+                  </button>
+                  <span>{page + 1}</span>
+                  <button
+                    type="button"
+                    disabled={page >= totalPages - 1}
+                    onClick={() => setPage(p => p + 1)}
+                    aria-label="Next page"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
+            </div>
             <ul className="ais-Hits-list">
-              {results.map(result => (
+              {pagedResults.map(result => (
                 <li className="ais-Hits-item" key={result.id}>
-                  <a href={result.url} onClick={e => {
-                    e.preventDefault()
-                    handleResultClick(result.url)
-                  }}>
-                    <div className="search-result-label">Documentation</div>
-                    <h5 style={{ fontSize: '18px', marginBottom: '8px' }}>
+                  <a
+                    href={result.url}
+                    onClick={e => {
+                      e.preventDefault()
+                      handleResultClick(result.url)
+                    }}
+                  >
+                    <h5 className="search-result-title">
+                      <span className="search-result-bullet">■</span>
                       {result.title}
                     </h5>
-                    <p style={{ fontSize: '14px', margin: 0 }}>
-                      {result.description}
-                    </p>
+                    <div className="search-result-slug">{result.slug}</div>
+                    {result.description && (
+                      <p className="search-result-description">{result.description}</p>
+                    )}
                   </a>
                 </li>
               ))}
             </ul>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
