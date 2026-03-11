@@ -1,14 +1,8 @@
 import { defineMiddleware } from 'astro:middleware'
-import fs from 'node:fs'
 
+import enMessages from './content/i18n/en.json'
+import jpMessages from './content/i18n/ja.json'
 import { redirects } from './utils/redirects'
-
-const enMessages = JSON.parse(
-  fs.readFileSync(new URL('./content/i18n/en.json', import.meta.url), 'utf8')
-) as Record<string, string>
-const jpMessages = JSON.parse(
-  fs.readFileSync(new URL('./content/i18n/ja.json', import.meta.url), 'utf8')
-) as Record<string, string>
 
 function resolveLocale(pathname: string): 'en' | 'jp' {
   const localeMatch = pathname.match(/^\/docs\/([a-z]{2})(?:\/|$)/)

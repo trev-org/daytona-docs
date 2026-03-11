@@ -71,6 +71,16 @@ function normalizeDocId(docId: string): string {
   return docId.endsWith('/index') ? docId.slice(0, -'/index'.length) : docId
 }
 
+export async function getStaticPaths() {
+  const docs = await getCollection('docs')
+
+  return docs.map(doc => ({
+    params: {
+      slug: doc.id.endsWith('/index') ? doc.id.slice(0, -'/index'.length) : doc.id,
+    },
+  }))
+}
+
 const docs = await getCollection('docs')
 const requestedSlug = (Astro.params.slug || '').replace(/\/$/, '')
 

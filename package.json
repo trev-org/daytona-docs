@@ -14,7 +14,6 @@
     "@astrojs/mdx": "^4.3.1",
     "@astrojs/react": "^4.4.2",
     "@astrojs/starlight": "0.30.0",
-    "@astrojs/vercel": "^9.0.5",
     "@mintlify/astro": "^1.0.0",
     "@mintlify/components": "^1.0.5",
     "@mintlify/validation": "^0.1.587",
