@@ -10,5 +10,11 @@
       "destination": "/docs/en",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/docs/:path*",
+      "destination": "/:path*"
+    }
   ]
 }
